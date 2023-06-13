@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-with open('README.md', 'r') as md:
+with open('README.md', 'r', encoding="utf-8") as md:
     long_description = md.read()
 
 setup(
@@ -22,5 +22,6 @@ setup(
     license='GNU General Public License v3.0',
     python_requires=">=3.8",
     author='00.Neptune.00',
+    author_email='neptune.0@qq.com',
     description='nonebot2 plugin'
 )
