@@ -1,3 +1,6 @@
+<p align="center">
+  <a href="https://v2.nonebot.dev/"><img src="https://v2.nonebot.dev/logo.png" width="200" height="200" alt="nonebot"></a>
+</p>
 <div align="center">
 
 # nonebot-plugin-warthunder-player-check
@@ -6,11 +9,9 @@ _✨ Warthunder玩家战绩查询插件 ✨_
 <a href="https://github.com/Utmost-Happiness-Planet/uhpstatus/blob/main/LICENSE">
     <img src="https://img.shields.io/badge/license-GPL%20v3.0-orange" alt="license">
   </a>
-  
   <a href="https://github.com/nonebot/nonebot2">
     <img src="https://img.shields.io/badge/nonebot-v2-red" alt="nonebot">
-  </a> 
-  
+  </a>
   <a href="">
     <img src="https://img.shields.io/badge/release-v3.0-blueviolet" alt="release">
 </a>
