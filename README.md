@@ -1,7 +1,8 @@
 <div align="center">
 
-    # nonebot-plugin-warthunder-player-check
-    ✨ Warthunder玩家战绩查询插件 ✨
+# nonebot-plugin-warthunder-player-check
+_✨ Warthunder玩家战绩查询插件 ✨_
+
 <a href="https://github.com/Utmost-Happiness-Planet/uhpstatus/blob/main/LICENSE">
     <img src="https://img.shields.io/badge/license-GPL%20v3.0-orange" alt="license">
   </a>

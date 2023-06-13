@@ -18,10 +18,9 @@ setup(
         "beautifulsoup4",
         "pillow"
     ],
-    url='',
+    url='https://github.com/0Neptune0/nonebot-plugin-warthunder-player-check',
     license='GNU General Public License v3.0',
     python_requires=">=3.8",
     author='00.Neptune.00',
-
-    description='More convenient to create fastapi project'
+    description='nonebot2 plugin'
 )
