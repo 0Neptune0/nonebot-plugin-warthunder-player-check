@@ -20,7 +20,8 @@ _✨ Warthunder玩家战绩查询插件 ✨_
 俄罗斯原神话题中，还在因和别人对线时想查对方履历亦或者当kd警察但开游戏太麻烦或者暂时开不了只能让对面跳而烦恼吗？那赶快使用此插件，用实际数据证明对方是不是傻逼雷批吧！
 
 ## 使用方式
- - 发送 Command `战雷查水表` 或 `warthunder`
+ - 在nb-cli使用 `nb install nonebot-plugin-warthunder-player-check`~~（使用pip的默认你会在pyproject.toml添加）~~
+ - 发送 Command `战雷查水表` 或 `warthunder` 或直接 `战雷查水表 [玩家id]`~~（支持模糊搜索，但是有空格请用%替换）~~
 
 ## 配置项
   需要安装Chrome浏览器以及对应版本的driver<a href="https://github.com/Utmost-Happiness-Planet/uhpstatus/blob/main/LICENSE">

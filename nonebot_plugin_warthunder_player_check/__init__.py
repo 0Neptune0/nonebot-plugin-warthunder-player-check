@@ -25,7 +25,7 @@ img_path = str(os.getcwd()).replace('\\', '/') + '/src/plugins/pluto/_cache'
 __plugin_meta__ = PluginMetadata(
     name='战雷查水表',
     description='搜索warthunder社区查询玩家履历',
-    usage='/战雷查水表 玩家id '
+    usage='/战雷查水表 [玩家id]'
 )
 
 
