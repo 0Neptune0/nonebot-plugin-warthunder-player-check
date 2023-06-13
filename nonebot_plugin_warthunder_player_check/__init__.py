@@ -26,7 +26,7 @@ __plugin_meta__ = PluginMetadata(
     name='战雷查水表',
     description='搜索warthunder社区查询玩家履历',
     usage='/战雷查水表 [玩家id]',
-    type='`application`',
+    type='application',
     homepage='https://github.com/0Neptune0/nonebot-plugin-warthunder-player-check',
     supported_adapters={'~onebot.v11'}
 )

@@ -5,7 +5,7 @@ with open('README.md', 'r', encoding="utf-8") as md:
 
 setup(
     name='nonebot-plugin-warthunder-player-check',
-    version='0.1.0',
+    version='0.1.2',
     packages=find_packages(),
     include_package_data=True,
     long_description=long_description,
