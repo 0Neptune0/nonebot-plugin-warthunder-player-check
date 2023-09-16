@@ -1,25 +1,25 @@
-import os
-import time
 import asyncio
 from typing import Dict
 
 
-from nonebot import on_command
+from nonebot import on_command, get_driver
 from nonebot.params import CommandArg, ArgStr
 from nonebot.matcher import Matcher
 from nonebot.typing import T_State
 from nonebot.log import logger
 from nonebot.adapters.onebot.v11 import MessageEvent, Message, MessageSegment
 from nonebot.plugin import PluginMetadata
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.support.wait import WebDriverWait
-from selenium.webdriver.support import expected_conditions as ec
-import undetected_chromedriver as uc
+from playwright.async_api import async_playwright
 from bs4 import BeautifulSoup
 from PIL import Image
-img_path = str(os.getcwd()).replace('\\', '/') + '/src/plugins/pluto/_cache'
+from pydantic import BaseModel
+
+
+class Config(BaseModel):
+    cache_path: str
+
+
+config = Config.parse_obj(get_driver().config)
 
 
 __plugin_meta__ = PluginMetadata(
@@ -32,73 +32,74 @@ __plugin_meta__ = PluginMetadata(
 )
 
 
-options = Options()
-options.add_argument('--headless')
-options.add_argument('--disable-gpu')
+async def get_player_list(search_name: str) -> Dict[int, str]:
+    search_url = f'https://warthunder.com/zh/community/searchplayers?name={search_name}'
+    async with async_playwright() as p:
+        browser_type = p.firefox
+        browser = await browser_type.launch(headless=True, args=['--start-maximized'])
+        page = await browser.new_page()
+        await page.goto(search_url, timeout=0, wait_until="commit")
+        await asyncio.sleep(1)
+        await page.locator("""//*[@id="bodyRoot"]/div[4]/div[2]/div[3]/div/section[2]/div/table""").screenshot(
+            path="file:///" + config.cache_path + '/warthunder_search.png',)
+        content = await page.content()
+        soup = BeautifulSoup(content, 'html.parser')
+        player_dict = dict()
+        for player in soup.find('tbody').find_all('tr'):
+            index = int(player.find('td', attrs={'class': 'first_column'}).text)
+            search_name = player.find('td', attrs={'class': 'scp_td2'}).text
+            player_dict.update({index: search_name})
+        return player_dict
 
 
-def start_background_loop(loop: asyncio.AbstractEventLoop) -> None:
-    asyncio.set_event_loop(loop)
-    loop.run_forever()
-
-
-def get_player_list(search_name: str) -> Dict[int, str]:
-    search_rul = f'https://warthunder.com/zh/community/searchplayers?name={search_name}'
-    driver = webdriver.Chrome(options=options)
-    driver.get(search_rul)
-    WebDriverWait(driver, 30).until(
-        ec.visibility_of_element_located((By.XPATH, '/html/body/div[4]/div[3]')))
-    width = driver.execute_script("return document.documentElement.scrollWidth")
-    height = driver.execute_script("return document.documentElement.scrollHeight")
-    driver.set_window_size(width, height)
-    driver.find_element(By.XPATH, '/html/body/div[4]/div[2]/div[3]/div/section[2]/div/table').screenshot(
-        img_path + '/warthunder_search.png')
-    soup = BeautifulSoup(driver.page_source, 'html.parser')
-    driver.close()
-    player_dict = dict()
-    for player in soup.find('tbody').find_all('tr'):
-        index = int(player.find('td', attrs={'class': 'first_column'}).text)
-        search_name = player.find('td', attrs={'class': 'scp_td2'}).text
-        player_dict.update({index: search_name})
-    return player_dict
-
-
-def get_playerInfo(name: str):
-    playerInfo_url = 'https://warthunder.com/zh/community/userinfo/?nick={}'.format(name.replace(' ', '%'))
-    driver = uc.Chrome()
-    driver.get(playerInfo_url)
-    WebDriverWait(driver, 180).until(ec.visibility_of_element_located((By.XPATH, '/html/body/div[4]/div[3]')))
-    driver.execute_script("window.scrollBy(0,180)")
-    driver.find_element(By.XPATH, '/html/body/div[4]/div[5]/div/button[1]').click()
-    time.sleep(1)
-    driver.save_screenshot(img_path + '/warthunder_cache1.png')
-    driver.find_element(By.XPATH, '/html/body/div[4]/div[2]/div[3]/div/section/div[2]/div[2]/div[2]/div').screenshot(
-        img_path + '/warthunder_cache2.png')
-    driver.find_element(By.XPATH, '/html/body/div[4]/div[2]/div[3]/div/section/div[2]/div[2]/div[2]/ul/li[2]').click()
-    time.sleep(1)
-    driver.find_element(By.XPATH, '/html/body/div[4]/div[2]/div[3]/div/section/div[2]/div[2]/div[2]/div').screenshot(
-        img_path + '/warthunder_cache3.png')
-    driver.find_element(By.XPATH, '/html/body/div[4]/div[2]/div[3]/div/section/div[2]/div[2]/div[2]/ul/li[3]').click()
-    time.sleep(1)
-    driver.find_element(By.XPATH, '/html/body/div[4]/div[2]/div[3]/div/section/div[2]/div[2]/div[2]/div').screenshot(
-        img_path + '/warthunder_cache4.png')
-    driver.find_element(By.XPATH, '/html/body/div[4]/div[2]/div[3]/div/section/div[2]/div[3]').screenshot(
-        img_path + '/warthunder_cache5.png')
-    driver.close()
-    img1 = Image.open(img_path + '/warthunder_cache1.png')
-    im_copy = img1.copy()
-    im_crop = im_copy.crop((215, 90, 1690, 950))
-    img = Image.new('RGB', (1475, 3190))
-    img.paste(im_crop, (0, 0))
-    img2 = Image.open(img_path + '/warthunder_cache2.png')
-    img.paste(img2.resize((1475, 479 * 1475 // 1180)), (0, 860))
-    img3 = Image.open(img_path + '/warthunder_cache3.png')
-    img.paste(img3.resize((1475, 479 * 1475 // 1180)), (0, 1450))
-    img4 = Image.open(img_path + '/warthunder_cache4.png')
-    img.paste(img4.resize((1475, 479 * 1475 // 1180)), (0, 2040))
-    img5 = Image.open(img_path + '/warthunder_cache5.png')
-    img.paste(img5.resize((1475, 449 * 1475 // 1180)), (0, 2630))
-    img.save(img_path + '/warthunder_cache.png')
+async def get_player_detailed_info(name: str):
+    player_info_url = 'https://warthunder.com/zh/community/userinfo/?nick={}'.format(name.replace(' ', '%'))
+    async with async_playwright() as p:
+        browser_type = p.firefox
+        browser = await browser_type.launch(headless=True, args=['--start-maximized'])
+        content = await browser.new_context(viewport={'width': 1920, 'height': 1920})
+        page = await browser.new_page()
+        await page.goto(player_info_url, timeout=0)
+        await page.locator("xpath=/html/body/div[4]/div[5]/div/button[1]").click()
+        await asyncio.sleep(0.5)
+        await page.locator(
+            """xpath=//*[@id="bodyRoot"]/div[4]/div[2]/div[3]/div/section/div[2]/div[1]""").screenshot(
+            type="png", path="file:///" + config.cache_path + '/warthunder_cache1.png')
+        await page.locator(
+            """xpath=//*[@id="bodyRoot"]/div[4]/div[2]/div[3]/div/section/div[2]/div[2]/div[1]""").screenshot(
+            type="png", path="file:///" + config.cache_path + '/warthunder_cache2.png')
+        await page.locator(
+            """xpath=//*[@id="bodyRoot"]/div[4]/div[2]/div[3]/div/section/div[2]/div[2]/div[2]/div""").screenshot(
+            type="png", path="file:///" + "file:///" + config.cache_path + '/warthunder_cache3.png')
+        await page.locator(
+            """xpath=//*[@id="bodyRoot"]/div[4]/div[2]/div[3]/div/section/div[2]/div[2]/div[2]/ul/li[2]""").click()
+        await asyncio.sleep(0.5)
+        await page.locator(
+            """xpath=//*[@id="bodyRoot"]/div[4]/div[2]/div[3]/div/section/div[2]/div[2]/div[2]/div""").screenshot(
+            type="png", path="file:///" + config.cache_path + '/warthunder_cache4.png')
+        await page.locator(
+            """xpath=//*[@id="bodyRoot"]/div[4]/div[2]/div[3]/div/section/div[2]/div[2]/div[2]/ul/li[3]""").click()
+        await asyncio.sleep(0.5)
+        await page.locator(
+            """xpath=/html/body/div[4]/div[2]/div[3]/div/section/div[2]/div[2]/div[2]/div/div[3]""").screenshot(
+            type="png", path="file:///" + config.cache_path + '/warthunder_cache5.png')
+        await page.locator("""xpath=//*[@id="bodyRoot"]/div[4]/div[2]/div[3]/div/section/div[2]/div[3]""").screenshot(
+            type="png", path="file:///" + config.cache_path + '/warthunder_cache6.png')
+        img1 = Image.open("file:///" + config.cache_path + '/warthunder_cache1.png')
+        im_copy = img1.copy()
+        img = Image.new('RGB', (1475, 3090))
+        img.paste(im_copy, (170, 5))
+        img2 = Image.open("file:///" + config.cache_path + '/warthunder_cache2.png')
+        img.paste(img2.resize((1475, 479 * 1475 // 1180)), (0, 160))
+        img3 = Image.open("file:///" + config.cache_path + '/warthunder_cache3.png')
+        img.paste(img3.resize((1475, 479 * 1475 // 1180)), (0, 755))
+        img4 = Image.open("file:///" + config.cache_path + '/warthunder_cache4.png')
+        img.paste(img4.resize((1475, 479 * 1475 // 1180)), (0, 1355))
+        img5 = Image.open("file:///" + config.cache_path + '/warthunder_cache5.png')
+        img.paste(img5.resize((1475, 449 * 1475 // 1180)), (0, 1955))
+        img6 = Image.open("file:///" + config.cache_path + '/warthunder_cache6.png')
+        img.paste(img6.resize((1475, 449 * 1475 // 1180)), (0, 2515))
+        img.save("file:///" + config.cache_path + '/warthunder_cache.png')
 
 
 warthunder = on_command('warthunder', aliases={'战雷查水表'}, priority=99, block=True)
@@ -115,9 +116,9 @@ async def handle_first_receive(matcher: Matcher, event: MessageEvent, args: Mess
 async def player_dict_receive(event: MessageEvent, state: T_State, search_name: str = ArgStr("search_player")):
     try:
         search_name = search_name.replace('%', '%20')
-        player_dict = (await asyncio.to_thread(get_player_list, search_name=search_name))
+        player_dict = await get_player_list(search_name=search_name)
         state.update({'player_dict': player_dict})
-        await warthunder.send(MessageSegment.image('file:///' + img_path + '/warthunder_search.png'))
+        await warthunder.send(MessageSegment.image('file:///' + "file:///" + config.cache_path + '/warthunder_search.png'))
     except Exception as e:
         logger.error(e)
         await warthunder.finish('出现错误, 请重试')
@@ -131,8 +132,8 @@ async def get_player_info(event: MessageEvent, state: T_State, index: str = ArgS
         name = state['player_dict'].get(index)
         if name:
             name.replace(' ', '%')
-            await asyncio.to_thread(get_playerInfo, name=name)
-            await warthunder.finish(MessageSegment.image('file:///' + img_path + '/warthunder_cache.png'))
+            await get_player_detailed_info(name)
+            await warthunder.finish(MessageSegment.image('file:///' + "file:///" + config.cache_path + '/warthunder_cache.png'))
         else:
             raise ValueError
     except ValueError:

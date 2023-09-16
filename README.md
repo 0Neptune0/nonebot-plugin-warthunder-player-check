@@ -25,4 +25,6 @@ _✨ Warthunder玩家战绩查询插件 ✨_
  - 发送 Command `战雷查水表` 或 `warthunder` 或直接 `战雷查水表 [玩家id]`~~（支持模糊搜索，但是有空格请用%替换）~~
 
 ## 配置项
-  需要安装Chrome浏览器以及对应版本的driver<a href="https://github.com/Utmost-Happiness-Planet/uhpstatus/blob/main/LICENSE">
+  ```
+  CACHE_PATH=XXXX #缓存图片文件夹路径
+  ```

@@ -5,7 +5,7 @@ with open('README.md', 'r', encoding="utf-8") as md:
 
 setup(
     name='nonebot-plugin-warthunder-player-check',
-    version='0.1.2',
+    version='0.1.3',
     packages=find_packages(),
     include_package_data=True,
     long_description=long_description,
@@ -13,8 +13,7 @@ setup(
     install_requires=[
         "nonebot2 >= 2.0.0",
         "nonebot_adapter_onebot >= 2.2.3",
-        "selenium >= 4.10.0",
-        "undetected_chromedriver >= 3.5.0",
+        "playwright",
         "beautifulsoup4",
         "pillow"
     ],
